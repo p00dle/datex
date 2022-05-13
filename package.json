@@ -1,5 +1,5 @@
 {
-  "name": "datex",
+  "name": "@kksiuda/datex",
   "version": "0.9.2",
   "description": "Date parsing, stringifying and utilities",
   "main": "./dist/datex.js",
