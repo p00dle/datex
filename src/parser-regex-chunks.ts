@@ -1,0 +1,26 @@
+import type { FormatVariable, ParserRegexChunk } from './types';
+
+export const parsersRegexChunksByType: Record<FormatVariable, ParserRegexChunk> = {
+  YYYY: (_l) => '\\d\\d\\d\\d',
+  YY: (_l) => '\\d\\d',
+  QQ: (_l) => '\\d\\d',
+  Q: (_l) => '\\d',
+  MMMM: (l) => l.monthNames.slice(1).join('|'),
+  MMM: (l) => l.monthNamesShort.slice(1).join('|'),
+  MM: (_l) => '\\d\\d',
+  M: (_l) => '\\d{1,2}',
+  AM: (_l) => 'am|pm',
+  DDD: (l) => '\\d{1,2}(?:' + l.ordinalSuffixes.join('|') + ')',
+  DD: (_l) => '\\d\\d',
+  D: (_l) => '\\d{1,2}',
+  WWWW: (l) => l.weekDays.slice(1).join('|'),
+  WWW: (l) => l.weekDaysShort.slice(1).join('|'),
+  HH: (_l) => '\\d\\d',
+  H: (_l) => '\\d{1,2}',
+  mm: (_l) => '\\d\\d',
+  m: (_l) => '\\d{1,2}',
+  SS: (_l) => '\\d\\d',
+  S: (_l) => '\\d{1,2}',
+  sss: (_l) => '\\d\\d\\d',
+  s: (_l) => '\\d{1,3}',
+};
