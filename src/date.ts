@@ -1,7 +1,19 @@
 import type { DateData, DateLike, DateXParams, DST, LocaleData, Parser, PeriodType } from './types';
 import { locales } from './locales';
 import { DEFAULT_DATEX_PARAMS } from './constants';
-import { createDateData, populateDateData, YEAR, MONTH, DAY, HOURS, dateDataToEpoch, MINUTES, IS_DST } from './utils/date-data';
+import {
+  createDateData,
+  populateDateData,
+  YEAR,
+  MONTH,
+  DAY,
+  HOURS,
+  dateDataToEpoch,
+  MINUTES,
+  IS_DST,
+  SECONDS,
+  MILLISECONDS,
+} from './utils/date-data';
 import { getLocalTimezoneOffset, getLocalDST } from './utils/get-local';
 import { Stringifyer } from './types/Stringifyer';
 import { stringifyersByType, stringifyersByTypeAmPm } from './stringifyers';
@@ -160,5 +172,14 @@ export class DateX {
   public fromUTC(date: number): number {
     this.updateDateData(date);
     return date + this.timezoneOffsetMs - (this.dateData[IS_DST] ? 3600000 : 0);
+  }
+
+  public toDate(date: number): number {
+    this.updateDateData(date);
+    this.dateData[HOURS] = 0;
+    this.dateData[MINUTES] = 0;
+    this.dateData[SECONDS] = 0;
+    this.dateData[MILLISECONDS] = 0;
+    return dateDataToEpoch(this.dateData, this.timezoneOffsetMs, this.dst);
   }
 }

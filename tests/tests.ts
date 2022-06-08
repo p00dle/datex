@@ -368,6 +368,19 @@ describe('toUTC', () => {
   });
 });
 
+describe('toDate', () => {
+  const datetime = Date.UTC(2000, 0, 2, 3, 23, 13, 123);
+  it('without tz offset', () => {
+    expect(new DateX().toDate(datetime)).toBe(Date.UTC(2000, 0, 2));
+  });
+  it('with positive tz offset', () => {
+    expect(new DateX({ timezoneOffset: 6 }).toDate(datetime)).toBe(Date.UTC(2000, 0, 1, 18));
+  });
+  it('with negative tz offset', () => {
+    expect(new DateX({ timezoneOffset: -6 }).toDate(datetime)).toBe(Date.UTC(2000, 0, 1, 6));
+  });
+});
+
 describe('parsing and stringifying non-standard formats', () => {
   it('', () => {
     const inputs = [
