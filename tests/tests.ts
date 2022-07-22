@@ -105,7 +105,7 @@ describe('local timezone dst detection', () => {
       MockDate.returns.timezoneOffset = 0;
     };
     const datex = new DateX({ dst: 'local' }, MockDate);
-    expect(datex.parse('2000-01-01T00:00:00.000Z')).toBe(Date.UTC(2000, 0, 1, 1));
+    expect(datex.parse('2000-07-01T01:00:00.000Z')).toBe(Date.UTC(2000, 6, 1));
   });
   it('detects dst: eu', () => {
     MockDate.returns.year = 2000;
@@ -116,7 +116,7 @@ describe('local timezone dst detection', () => {
     MockDate.returns.day = 6;
     MockDate.onSetDate = () => null;
     const datex = new DateX({ dst: 'local' }, MockDate);
-    expect(datex.parse('2000-01-01T00:00:00.000Z')).toBe(Date.UTC(2000, 0, 1, 1));
+    expect(datex.parse('2000-07-01T01:00:00.000Z')).toBe(Date.UTC(2000, 6, 1));
   });
 });
 
@@ -272,6 +272,7 @@ describe('parse returns NaN on invalid input', () => {
 
   it('invalid format', () => expect(datex.parse('12-03-2001')).toBeNaN());
   it('empty string', () => expect(datex.parse('')).toBeNaN());
+  // @ts-expect-error null not a valid input
   it('null', () => expect(datex.parse(null)).toBeNaN());
   // @ts-expect-error number not a valid input
   it('number', () => expect(datex.parse(0)).toBeNaN());
@@ -356,15 +357,15 @@ describe('get helper methods', () => {
 });
 
 describe('toUTC', () => {
-  const date = Date.UTC(2000, 0, 2, 12);
+  const date = Date.UTC(2000, 8, 2, 12);
   it('timezoneOffset', () => {
-    expect(new DateX({ timezoneOffset: -6 }).toUTC(date)).toBe(Date.UTC(2000, 0, 2, 18));
+    expect(new DateX({ timezoneOffset: -6 }).toUTC(date)).toBe(Date.UTC(2000, 8, 2, 18));
   });
   it('dst', () => {
-    expect(new DateX({ dst: 'eu' }).toUTC(date)).toBe(Date.UTC(2000, 0, 2, 13));
+    expect(new DateX({ dst: 'eu' }).toUTC(date)).toBe(Date.UTC(2000, 8, 2, 13));
   });
   it('timezoneOffset and dst', () => {
-    expect(new DateX({ dst: 'eu', timezoneOffset: -6 }).toUTC(date)).toBe(Date.UTC(2000, 0, 2, 19));
+    expect(new DateX({ dst: 'eu', timezoneOffset: -6 }).toUTC(date)).toBe(Date.UTC(2000, 8, 2, 19));
   });
 });
 
@@ -427,6 +428,13 @@ describe('utils', () => {
     expect(range(0, 3)).toEqual([0, 1, 2]);
     expect(range(0, 10, 2)).toEqual([0, 2, 4, 6, 8]);
     expect(range(0, 10, 2, true)).toEqual([0, 2, 4, 6, 8, 10]);
+  });
+});
+
+describe('misc', () => {
+  it('test for invalid 31st of June date', () => {
+    const datex = new DateX({ format: 'DD/MM/YYYY', timezoneOffset: -7, dst: 'us' });
+    expect(datex.stringify(1656660706225)).toBe('01/07/2022');
   });
 });
 

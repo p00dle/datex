@@ -2,7 +2,7 @@ import type { DST, DateData } from '../types';
 
 import {
   MONTH_WEEKDAY,
-  MONTH_DAY_COUNT_LEAP,
+  // MONTH_DAY_COUNT_LEAP,
   MONTH_DAY_COUNT,
   MAR_1WD_CACHE,
   DAYS_SINCE_1970,
@@ -54,25 +54,25 @@ export function populateDST(dst: DST, d: DateData): void {
     d[IS_DST] = 0;
   } else if (dst === 'us') {
     if (d[MONTH] > 3 && d[MONTH] < 11) {
-      d[IS_DST] = 0;
+      d[IS_DST] = 1;
     } else if (d[MONTH] === 3) {
       if (d[DAY] * 24 + d[HOURS] >= (15 - MAR_1WD_CACHE[d[YEARS_SINCE_1970]]) * 24 + 2) {
-        d[IS_DST] = 1;
-      } else {
         d[IS_DST] = 0;
+      } else {
+        d[IS_DST] = 1;
       }
     } else if (d[MONTH] === 11) {
       if (d[DAY] * 24 + d[HOURS] < (8 - MAR_1WD_CACHE[d[YEARS_SINCE_1970]]) * 24 + 2) {
-        d[IS_DST] = 1;
-      } else {
         d[IS_DST] = 0;
+      } else {
+        d[IS_DST] = 1;
       }
     } else {
-      d[IS_DST] = 1;
+      d[IS_DST] = 0;
     }
   } else if (dst === 'eu') {
     if (d[MONTH] > 3 && d[MONTH] < 10) {
-      d[IS_DST] = 0;
+      d[IS_DST] = 1;
     } else if (d[MONTH] === 3) {
       if (d[DAY] * 24 + d[HOURS] >= (31 - ((MAR_1WD_CACHE[d[YEARS_SINCE_1970]] + 2) % 7)) * 24 + 1) {
         d[IS_DST] = 1;
@@ -80,13 +80,13 @@ export function populateDST(dst: DST, d: DateData): void {
         d[IS_DST] = 0;
       }
     } else if (d[MONTH] === 10) {
-      if (d[DAY] * 24 + d[HOURS] < (32 - MAR_1WD_CACHE[d[YEARS_SINCE_1970]]) * 24 + 1) {
+      if (d[DAY] * 24 + d[HOURS] <= (32 - MAR_1WD_CACHE[d[YEARS_SINCE_1970]]) * 24 + 1) {
         d[IS_DST] = 1;
       } else {
         d[IS_DST] = 0;
       }
     } else {
-      d[IS_DST] = 1;
+      d[IS_DST] = 0;
     }
   }
 }
@@ -119,27 +119,19 @@ export function populateDateData(d: DateData, timezoneOffsetMs: number, dst: DST
   // console.log('MONTH', d[MONTH]);
   const daysToBegginingOfMonth = d[IS_LEAP_YEAR] === 1 ? DAYS_TO_MONTH_LEAP : DAYS_TO_MONTH;
   // console.log({ daysSinceBeginningOfYear, daysToBegginingOfMonth });
-  while (daysSinceBeginningOfYear > daysToBegginingOfMonth[d[MONTH] + 1]) {
+  while (daysSinceBeginningOfYear >= daysToBegginingOfMonth[d[MONTH] + 1]) {
     d[MONTH]++;
   }
   d[DAY] = daysSinceBeginningOfYear - daysToBegginingOfMonth[d[MONTH]] + 1;
-  // console.log('DAY', d[DAY]);
-  // */
-
   populateDST(dst, d);
   if (d[IS_DST] === 1) {
-    d[HOURS]--;
-    if (d[HOURS] === -1) {
-      d[HOURS] = 23;
-      d[DAY]--;
-      if (d[DAY] === 0) {
-        d[MONTH]--;
-        if (d[MONTH] === 0) {
-          d[MONTH] = 12;
-          d[YEAR]--;
-          populateLeapYear(d);
-        }
-        d[DAY] = (d[IS_LEAP_YEAR] === 1 ? MONTH_DAY_COUNT_LEAP : MONTH_DAY_COUNT)[d[MONTH]];
+    d[HOURS]++;
+    if (d[HOURS] === 24) {
+      d[HOURS] = 0;
+      d[DAY]++;
+      if (d[DAY] > MONTH_DAY_COUNT[d[MONTH]]) {
+        d[DAY] = 1;
+        d[MONTH]++;
       }
     }
   }
@@ -162,7 +154,7 @@ export function dateDataToEpoch(d: DateData, timezoneOffsetMs: number, dst: DST)
     d[MINUTES] * 60000 +
     d[SECONDS] * 1000 +
     d[MILLISECONDS] -
-    timezoneOffsetMs +
+    timezoneOffsetMs -
     (d[IS_DST] === 1 ? 3600000 : 0)
   );
 }
